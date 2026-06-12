@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Placement Intelligence Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ink: #0f0e0d;
+    --paper: #f7f4ef;
+    --cream: #ede9e1;
+    --accent: #1a3a2a;
+    --gold: #c9a84c;
+    --muted: #7a7570;
+    --success: #2d6a4f;
+    --warn: #b5451b;
+    --easy: #2d6a4f;
+    --medium: #b07d2a;
+    --hard: #b5451b;
+    --card-bg: #ffffff;
+    --border: #ddd9d0;
+    --shadow: 0 2px 20px rgba(15,14,13,0.07);
+    --radius: 14px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    position: relative;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,168,76,0.10) 0%, transparent 70%),
+      var(--paper);
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 39px, var(--border) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, var(--border) 40px);
+    opacity: 0.35;
+    pointer-events: none;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 100px;
+    margin-bottom: 2rem;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .hero-badge span { opacity: 0.7; }
+
+  .hero h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(2.8rem, 7vw, 5.5rem);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    max-width: 14ch;
+    margin-bottom: 1.25rem;
+    animation: fadeUp 0.7s 0.1s ease both;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .hero p {
+    font-size: 1.1rem;
+    color: var(--muted);
+    max-width: 48ch;
+    line-height: 1.65;
+    margin-bottom: 2.5rem;
+    animation: fadeUp 0.7s 0.2s ease both;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    animation: fadeUp 0.7s 0.3s ease both;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 14px 32px;
+    border-radius: 100px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+    box-shadow: 0 4px 20px rgba(26,58,42,0.25);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(26,58,42,0.35);
+    background: #1f4a35;
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--ink);
+    border: 1.5px solid var(--border);
+    padding: 14px 32px;
+    border-radius: 100px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .btn-secondary:hover { border-color: var(--accent); background: var(--cream); }
+
+  .hero-stats {
+    display: flex;
+    gap: 2.5rem;
+    margin-top: 4rem;
+    animation: fadeUp 0.7s 0.4s ease both;
+  }
+
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: 'Instrument Serif', serif;
+    font-size: 2rem;
+    color: var(--accent);
+  }
+  .stat-label { font-size: 12px; color: var(--muted); letter-spacing: 0.05em; text-transform: uppercase; margin-top: 2px; }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 40px;
+    background: rgba(247,244,239,0.88);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.3rem;
+    color: var(--accent);
+    letter-spacing: -0.01em;
+  }
+
+  .nav-links { display: flex; gap: 8px; }
+  .nav-link {
+    background: none; border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 500;
+    color: var(--muted);
+    padding: 8px 16px; border-radius: 100px;
+    cursor: pointer; transition: color 0.2s, background 0.2s;
+  }
+  .nav-link:hover, .nav-link.active { color: var(--ink); background: var(--cream); }
+
+  /* ── SECTIONS ── */
+  .section { display: none; min-height: 100vh; padding: 120px 40px 60px; max-width: 1100px; margin: 0 auto; }
+  .section.active { display: block; }
+
+  .section-header { margin-bottom: 2.5rem; }
+  .section-header h2 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 2.4rem;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+  .section-header p { color: var(--muted); font-size: 15px; }
+
+  /* ── ASK AI ── */
+  .chat-container {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+
+  .chat-messages {
+    min-height: 380px;
+    max-height: 520px;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .chat-empty {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; color: var(--muted); gap: 10px;
+    padding: 40px;
+  }
+  .chat-empty-icon { font-size: 2.5rem; opacity: 0.4; }
+  .chat-empty p { font-size: 14px; line-height: 1.6; max-width: 32ch; }
+
+  .message { display: flex; gap: 10px; animation: fadeUp 0.3s ease; }
+  .message.user { flex-direction: row-reverse; }
+
+  .msg-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; flex-shrink: 0; margin-top: 2px;
+  }
+  .message.user .msg-avatar { background: var(--accent); color: #fff; }
+  .message.ai .msg-avatar { background: var(--cream); color: var(--accent); border: 1px solid var(--border); }
+
+  .msg-bubble {
+    max-width: 78%;
+    padding: 13px 16px;
+    border-radius: 14px;
+    font-size: 14px;
+    line-height: 1.65;
+  }
+  .message.user .msg-bubble {
+    background: var(--accent); color: #fff;
+    border-radius: 14px 4px 14px 14px;
+  }
+  .message.ai .msg-bubble {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 4px 14px 14px 14px;
+    white-space: pre-wrap;
+  }
+
+  .msg-sources {
+    margin-top: 8px;
+    display: flex; flex-wrap: wrap; gap: 5px;
+  }
+  .source-tag {
+    font-size: 11px; font-weight: 600;
+    background: var(--accent); color: #fff;
+    padding: 3px 9px; border-radius: 100px;
+    opacity: 0.85;
+  }
+
+  .typing-dots {
+    display: flex; gap: 4px; align-items: center; padding: 6px 0;
+  }
+  .typing-dots span {
+    width: 6px; height: 6px; background: var(--muted);
+    border-radius: 50%; animation: bounce 1.2s infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  .chat-input-bar {
+    border-top: 1px solid var(--border);
+    padding: 16px 20px;
+    display: flex; gap: 10px; align-items: flex-end;
+    background: var(--paper);
+  }
+
+  .chat-input {
+    flex: 1;
+    resize: none;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 11px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    background: #fff;
+    outline: none;
+    transition: border-color 0.2s;
+    min-height: 44px; max-height: 120px;
+  }
+  .chat-input:focus { border-color: var(--accent); }
+
+  .send-btn {
+    background: var(--accent); color: #fff; border: none;
+    width: 44px; height: 44px; border-radius: 10px;
+    cursor: pointer; font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.15s, background 0.2s;
+    flex-shrink: 0;
+  }
+  .send-btn:hover { background: #1f4a35; transform: scale(1.05); }
+  .send-btn:disabled { background: var(--border); cursor: not-allowed; transform: none; }
+
+  .suggested-questions {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px;
+  }
+  .suggested-q {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: 100px;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+  }
+  .suggested-q:hover { border-color: var(--accent); color: var(--accent); background: var(--cream); }
+
+  /* ── ELIGIBILITY ── */
+  .eligibility-form {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    box-shadow: var(--shadow);
+    max-width: 540px;
+    margin-bottom: 2rem;
+  }
+
+  .form-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+
+  .form-group { flex: 1; min-width: 180px; }
+  .form-group label {
+    display: block; font-size: 12px; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 8px;
+  }
+  .form-group input[type="number"] {
+    width: 100%; padding: 11px 14px;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    font-family: 'DM Sans', sans-serif; font-size: 15px;
+    color: var(--ink); background: #fff; outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-group input:focus { border-color: var(--accent); }
+
+  .toggle-group { display: flex; gap: 8px; }
+  .toggle-btn {
+    flex: 1; padding: 11px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: #fff; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+    color: var(--muted); transition: all 0.2s;
+  }
+  .toggle-btn.active { border-color: var(--accent); background: var(--accent); color: #fff; }
+
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 14px;
+  }
+
+  .company-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s, box-shadow 0.2s;
+    animation: fadeUp 0.4s ease both;
+  }
+  .company-card:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(15,14,13,0.1); }
+
+  .card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+  .card-company { font-family: 'Instrument Serif', serif; font-size: 1.2rem; }
+  .card-role { font-size: 12px; color: var(--muted); margin-top: 1px; }
+
+  .diff-badge {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.05em;
+    text-transform: uppercase; padding: 4px 10px; border-radius: 100px;
+  }
+  .diff-Easy { background: #d1fae5; color: var(--easy); }
+  .diff-Medium { background: #fef3c7; color: var(--medium); }
+  .diff-Hard { background: #fee2e2; color: var(--warn); }
+
+  .card-meta { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 10px; }
+  .meta-item { font-size: 12px; color: var(--muted); }
+  .meta-item strong { color: var(--ink); }
+
+  .topic-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .topic-tag {
+    font-size: 11px; font-weight: 500;
+    background: var(--cream); color: var(--accent);
+    border: 1px solid var(--border);
+    padding: 3px 9px; border-radius: 100px;
+  }
+
+  /* ── COMPANIES TABLE ── */
+  .table-wrap {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+
+  .table-toolbar {
+    padding: 16px 20px;
+    display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+    border-bottom: 1px solid var(--border);
+    background: var(--paper);
+  }
+
+  .search-input {
+    flex: 1; min-width: 200px;
+    padding: 9px 14px;
+    border: 1.5px solid var(--border); border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px;
+    color: var(--ink); background: #fff; outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-input:focus { border-color: var(--accent); }
+
+  .filter-select {
+    padding: 9px 14px;
+    border: 1.5px solid var(--border); border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px;
+    color: var(--ink); background: #fff; outline: none; cursor: pointer;
+  }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  thead { background: var(--paper); }
+  th {
+    text-align: left; padding: 12px 16px;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--muted); border-bottom: 1px solid var(--border);
+  }
+  td { padding: 13px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--paper); }
+
+  /* ── STATS ── */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-bottom: 2rem; }
+
+  .stat-card {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 22px 24px;
+    box-shadow: var(--shadow); animation: fadeUp 0.4s ease both;
+  }
+  .stat-card-label { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .stat-card-value { font-family: 'Instrument Serif', serif; font-size: 2.2rem; color: var(--accent); line-height: 1; }
+  .stat-card-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  .chart-card {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px;
+    box-shadow: var(--shadow); margin-bottom: 16px;
+  }
+  .chart-card h3 { font-size: 14px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 18px; }
+
+  .bar-chart { display: flex; flex-direction: column; gap: 10px; }
+  .bar-row { display: flex; align-items: center; gap: 12px; }
+  .bar-label { font-size: 13px; font-weight: 500; min-width: 110px; color: var(--ink); }
+  .bar-track { flex: 1; height: 10px; background: var(--cream); border-radius: 100px; overflow: hidden; }
+  .bar-fill { height: 100%; background: var(--accent); border-radius: 100px; transition: width 1s ease; }
+  .bar-count { font-size: 12px; color: var(--muted); min-width: 24px; text-align: right; }
+
+  /* ── RESULT BADGE ── */
+  .result-selected { color: var(--success); font-weight: 600; }
+  .result-rejected { color: var(--warn); font-weight: 600; }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center; padding: 60px 20px; color: var(--muted);
+  }
+  .empty-state .icon { font-size: 3rem; margin-bottom: 12px; opacity: 0.4; }
+  .empty-state p { font-size: 15px; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes bounce {
+    0%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-6px); }
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 100px; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px) {
+    nav { padding: 14px 20px; }
+    .section { padding: 100px 20px 40px; }
+    .hero-stats { gap: 1.5rem; }
+    table { font-size: 12px; }
+    th, td { padding: 10px 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Placement·AI</div>
+  <div class="nav-links">
+    <button class="nav-link" onclick="showSection('ask')">Ask AI</button>
+    <button class="nav-link" onclick="showSection('eligibility')">Eligibility</button>
+    <button class="nav-link" onclick="showSection('companies')">Companies</button>
+    <button class="nav-link" onclick="showSection('stats')">Stats</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div id="hero" class="hero">
+  <div class="hero-badge">✦ <span>2025 Placement Intelligence</span></div>
+  <h1>Your <em>placement</em> advisor, powered by AI</h1>
+  <p>Ask anything about campus interviews — topics, eligibility, difficulty, company-specific tips — all grounded in real 2025 placement data.</p>
+  <div class="hero-actions">
+    <button class="btn-primary" onclick="showSection('ask')">Ask a Question</button>
+    <button class="btn-secondary" onclick="showSection('eligibility')">Check Eligibility</button>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num">45</div><div class="stat-label">Companies</div></div>
+    <div class="stat"><div class="stat-num">2025</div><div class="stat-label">Placement Year</div></div>
+    <div class="stat"><div class="stat-num">RAG</div><div class="stat-label">AI Powered</div></div>
+  </div>
+</div>
+
+<!-- ASK AI -->
+<div id="ask" class="section">
+  <div class="section-header">
+    <h2>Ask the AI</h2>
+    <p>Ask anything about placements — company topics, rounds, eligibility, difficulty trends.</p>
+  </div>
+
+  <div class="chat-container">
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-empty" id="chatEmpty">
+        <div class="chat-empty-icon">✦</div>
+        <p>Ask me about any company, topic, or eligibility requirement. I'll answer from verified placement records.</p>
+      </div>
+    </div>
+    <div class="chat-input-bar">
+      <textarea class="chat-input" id="chatInput" rows="1" placeholder="e.g. What topics does Amazon test?" onkeydown="handleKey(event)"></textarea>
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()">↑</button>
+    </div>
+  </div>
+
+  <div class="suggested-questions">
+    <button class="suggested-q" onclick="ask('What topics does Amazon test?')">Amazon topics?</button>
+    <button class="suggested-q" onclick="ask('Which companies test Dynamic Programming?')">DP companies?</button>
+    <button class="suggested-q" onclick="ask('What is the backlog policy at Swiggy and Zomato?')">Backlog policies?</button>
+    <button class="suggested-q" onclick="ask('List all Hard difficulty companies')">Hard companies?</button>
+    <button class="suggested-q" onclick="ask('Which fintech companies should I prepare for?')">Fintech prep?</button>
+    <button class="suggested-q" onclick="ask('How is Google interview different from Microsoft?')">Google vs Microsoft?</button>
+  </div>
+</div>
+
+<!-- ELIGIBILITY -->
+<div id="eligibility" class="section">
+  <div class="section-header">
+    <h2>Eligibility Checker</h2>
+    <p>Enter your profile to instantly see which companies you can apply to.</p>
+  </div>
+
+  <div class="eligibility-form">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Your CGPA</label>
+        <input type="number" id="cgpaInput" min="0" max="10" step="0.1" value="7.5" placeholder="e.g. 7.5" />
+      </div>
+      <div class="form-group">
+        <label>Active Backlog?</label>
+        <div class="toggle-group">
+          <button class="toggle-btn active" id="btnNo" onclick="setBacklog(false)">No Backlog</button>
+          <button class="toggle-btn" id="btnYes" onclick="setBacklog(true)">Has Backlog</button>
+        </div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="checkEligibility()" style="width:100%">Check Eligibility</button>
+  </div>
+
+  <div id="eligibilityResult"></div>
+</div>
+
+<!-- COMPANIES -->
+<div id="companies" class="section">
+  <div class="section-header">
+    <h2>All Companies</h2>
+    <p>Browse all 45 companies with placement data from 2025.</p>
+  </div>
+
+  <div class="table-wrap">
+    <div class="table-toolbar">
+      <input class="search-input" id="searchInput" placeholder="Search company or topic..." oninput="filterTable()" />
+      <select class="filter-select" id="diffFilter" onchange="filterTable()">
+        <option value="">All Difficulties</option>
+        <option value="Easy">Easy</option>
+        <option value="Medium">Medium</option>
+        <option value="Hard">Hard</option>
+      </select>
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr>
+            <th>Company</th>
+            <th>Role</th>
+            <th>Difficulty</th>
+            <th>Min CGPA</th>
+            <th>Topics</th>
+            <th>Result</th>
+          </tr>
+        </thead>
+        <tbody id="companyTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div id="stats" class="section">
+  <div class="section-header">
+    <h2>Placement Stats</h2>
+    <p>Topic trends, difficulty distribution, and key metrics from 2025 placements.</p>
+  </div>
+
+  <div class="stats-grid" id="statsCards"></div>
+  <div class="chart-card">
+    <h3>Top Topics by Frequency</h3>
+    <div class="bar-chart" id="topicsChart"></div>
+  </div>
+  <div class="chart-card">
+    <h3>Difficulty Distribution</h3>
+    <div class="bar-chart" id="diffChart"></div>
+  </div>
+</div>
+
+<script>
+const API = 'http://127.0.0.1:5000';
+let hasBacklog = false;
+let allCompanies = [];
+
+// ── Navigation ──────────────────────────────────────────────────────────
+
+function showSection(id) {
+  document.getElementById('hero').style.display = 'none';
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(b => {
+    if (b.textContent.toLowerCase().includes(id.substring(0, 4))) b.classList.add('active');
+  });
+  if (id === 'companies' && allCompanies.length === 0) loadCompanies();
+  if (id === 'stats') loadStats();
+}
+
+// ── Ask AI ───────────────────────────────────────────────────────────────
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function ask(q) {
+  showSection('ask');
+  document.getElementById('chatInput').value = q;
+  sendMessage();
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const question = input.value.trim();
+  if (!question) return;
+
+  document.getElementById('chatEmpty').style.display = 'none';
+  input.value = '';
+  document.getElementById('sendBtn').disabled = true;
+
+  appendMessage('user', question, []);
+
+  const typingId = appendTyping();
+
+  try {
+    const res = await fetch(`${API}/api/ask`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question }),
+    });
+    const data = await res.json();
+    removeTyping(typingId);
+    if (data.error) {
+      appendMessage('ai', '⚠️ ' + data.error, []);
+    } else {
+      appendMessage('ai', data.answer, data.sources || []);
+    }
+  } catch (e) {
+    removeTyping(typingId);
+    appendMessage('ai', '⚠️ Could not connect to the RAG API. Make sure rag_api.py is running on port 5000.', []);
+  }
+
+  document.getElementById('sendBtn').disabled = false;
+}
+
+function appendMessage(role, text, sources) {
+  const container = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = `message ${role}`;
+  const avatar = role === 'user' ? '👤' : '✦';
+  let sourcesHtml = '';
+  if (sources && sources.length > 0) {
+    sourcesHtml = `<div class="msg-sources">${sources.map(s => `<span class="source-tag">${s}</span>`).join('')}</div>`;
+  }
+  div.innerHTML = `
+    <div class="msg-avatar">${avatar}</div>
+    <div>
+      <div class="msg-bubble">${text}</div>
+      ${sourcesHtml}
+    </div>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function appendTyping() {
+  const container = document.getElementById('chatMessages');
+  const id = 'typing-' + Date.now();
+  const div = document.createElement('div');
+  div.className = 'message ai'; div.id = id;
+  div.innerHTML = `
+    <div class="msg-avatar">✦</div>
+    <div class="msg-bubble" style="padding:10px 16px">
+      <div class="typing-dots"><span></span><span></span><span></span></div>
+    </div>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  return id;
+}
+
+function removeTyping(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+// ── Eligibility ──────────────────────────────────────────────────────────
+
+function setBacklog(val) {
+  hasBacklog = val;
+  document.getElementById('btnNo').classList.toggle('active', !val);
+  document.getElementById('btnYes').classList.toggle('active', val);
+}
+
+async function checkEligibility() {
+  const cgpa = parseFloat(document.getElementById('cgpaInput').value);
+  if (isNaN(cgpa) || cgpa < 0 || cgpa > 10) {
+    alert('Please enter a valid CGPA between 0 and 10.'); return;
+  }
+
+  const resultDiv = document.getElementById('eligibilityResult');
+  resultDiv.innerHTML = '<p style="color:var(--muted);padding:10px 0">Checking...</p>';
+
+  try {
+    const res = await fetch(`${API}/api/eligibility`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cgpa, has_backlog: hasBacklog }),
+    });
+    const data = await res.json();
+
+    if (data.companies.length === 0) {
+      resultDiv.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>No companies match your profile.</p></div>';
+      return;
+    }
+
+    resultDiv.innerHTML = `
+      <p style="font-size:14px;color:var(--muted);margin-bottom:16px">
+        Found <strong style="color:var(--accent)">${data.count} companies</strong> matching CGPA ≥ ${cgpa}${hasBacklog ? ' with backlog' : ''}
+      </p>
+      <div class="results-grid" id="eligGrid"></div>`;
+
+    const grid = document.getElementById('eligGrid');
+    data.companies.forEach((c, i) => {
+      const card = document.createElement('div');
+      card.className = 'company-card';
+      card.style.animationDelay = `${i * 0.04}s`;
+      card.innerHTML = `
+        <div class="card-top">
+          <div>
+            <div class="card-company">${c.company}</div>
+            <div class="card-role">${c.role}</div>
+          </div>
+          <span class="diff-badge diff-${c.difficulty}">${c.difficulty}</span>
+        </div>
+        <div class="card-meta">
+          <div class="meta-item">CGPA <strong>${c.cgpa_cutoff}</strong></div>
+          <div class="meta-item">Rounds <strong>${c.rounds}</strong></div>
+        </div>
+        <div class="topic-tags">${c.topics.map(t => `<span class="topic-tag">${t}</span>`).join('')}</div>`;
+      grid.appendChild(card);
+    });
+  } catch (e) {
+    resultDiv.innerHTML = '<p style="color:var(--warn)">⚠️ Could not connect to API. Make sure rag_api.py is running.</p>';
+  }
+}
+
+// ── Companies Table ───────────────────────────────────────────────────────
+
+async function loadCompanies() {
+  try {
+    const res = await fetch(`${API}/api/companies`);
+    allCompanies = await res.json();
+    renderTable(allCompanies);
+  } catch {
+    document.getElementById('companyTableBody').innerHTML =
+      '<tr><td colspan="6" style="text-align:center;color:var(--warn);padding:40px">⚠️ Could not connect to API.</td></tr>';
+  }
+}
+
+function renderTable(data) {
+  const tbody = document.getElementById('companyTableBody');
+  if (data.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:40px">No results found</td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(c => `
+    <tr>
+      <td><strong>${c.company}</strong></td>
+      <td style="color:var(--muted)">${c.role}</td>
+      <td><span class="diff-badge diff-${c.difficulty}">${c.difficulty}</span></td>
+      <td>${c.cgpa_cutoff}</td>
+      <td><div class="topic-tags">${c.topics.map(t => `<span class="topic-tag">${t}</span>`).join('')}</div></td>
+      <td class="result-${c.result}">${c.result === 'Selected' ? '✓ Selected' : '✗ Rejected'}</td>
+    </tr>`).join('');
+}
+
+function filterTable() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const diff = document.getElementById('diffFilter').value;
+  const filtered = allCompanies.filter(c => {
+    const matchQ = !q || c.company.toLowerCase().includes(q) || c.topics.some(t => t.toLowerCase().includes(q));
+    const matchD = !diff || c.difficulty === diff;
+    return matchQ && matchD;
+  });
+  renderTable(filtered);
+}
+
+// ── Stats ─────────────────────────────────────────────────────────────────
+
+async function loadStats() {
+  try {
+    const res = await fetch(`${API}/api/stats`);
+    const data = await res.json();
+
+    const selRate = Math.round((data.selected / data.total) * 100);
+    document.getElementById('statsCards').innerHTML = `
+      <div class="stat-card"><div class="stat-card-label">Total Companies</div><div class="stat-card-value">${data.total}</div><div class="stat-card-sub">2025 placement drives</div></div>
+      <div class="stat-card"><div class="stat-card-label">Selection Rate</div><div class="stat-card-value">${selRate}%</div><div class="stat-card-sub">${data.selected} of ${data.total} selected</div></div>
+      <div class="stat-card"><div class="stat-card-label">Most Common Topic</div><div class="stat-card-value" style="font-size:1.5rem">${data.top_topics[0].topic}</div><div class="stat-card-sub">in ${data.top_topics[0].count} companies</div></div>
+      <div class="stat-card"><div class="stat-card-label">Top Difficulty</div><div class="stat-card-value" style="font-size:1.5rem">Medium</div><div class="stat-card-sub">${data.difficulty.Medium || 0} companies</div></div>
+    `;
+
+    const maxT = data.top_topics[0].count;
+    document.getElementById('topicsChart').innerHTML = data.top_topics.map(t => `
+      <div class="bar-row">
+        <div class="bar-label">${t.topic}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${(t.count/maxT*100).toFixed(0)}%"></div></div>
+        <div class="bar-count">${t.count}</div>
+      </div>`).join('');
+
+    const diffs = [
+      { name: 'Easy', count: data.difficulty.Easy || 0, color: '#2d6a4f' },
+      { name: 'Medium', count: data.difficulty.Medium || 0, color: '#b07d2a' },
+      { name: 'Hard', count: data.difficulty.Hard || 0, color: '#b5451b' },
+    ];
+    const maxD = Math.max(...diffs.map(d => d.count));
+    document.getElementById('diffChart').innerHTML = diffs.map(d => `
+      <div class="bar-row">
+        <div class="bar-label">${d.name}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${(d.count/maxD*100).toFixed(0)}%;background:${d.color}"></div></div>
+        <div class="bar-count">${d.count}</div>
+      </div>`).join('');
+
+  } catch {
+    document.getElementById('statsCards').innerHTML = '<p style="color:var(--warn)">⚠️ Could not connect to API.</p>';
+  }
+}
+</script>
+</body>
+</html>
